@@ -22,9 +22,9 @@ def do_post(path, ulabel):
   mycloud.auth('glebone@yandex.ru', '')
   img = mycloud.upload_file(path.get_text() )
   share_url = img["url"]
-  print ">>>>>>>>>>>>>>>>>>>>"
+  print "Successfully upload photo - "
   print share_url
-  ulabel.set_text("Image uploaded by url: "share_url)
+  ulabel.set_text("Image uploaded by url: " + share_url)
   pyperclip.copy(share_url)
 
 
