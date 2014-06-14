@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 import gtk
 import ntpath
+import time
+import os
 from cloudapp.cloud import Cloud
 import pyperclip
+import pyscreenshot as ImageGrab
+
 
 # custom modules
 import getImage
@@ -22,9 +26,7 @@ def do_post(path, ulabel):
   mycloud.auth('glebone@yandex.ru', '')
   img = mycloud.upload_file(path.get_text() )
   share_url = img["url"]
-  print ">>>>>>>>>>>>>>>>>>>>"
-  print share_url
-  ulabel.set_text("Image uploaded by url: "share_url)
+  ulabel.set_text("Image uploaded by url: " + share_url)
   pyperclip.copy(share_url)
 
 
@@ -38,19 +40,34 @@ def make_box_urlabel(urlabel):
   return box
 
 
-def make_screenshot_box:
+def make_screenshot_box(imlabel, urlabel):
+
+  box = gtk.HBox(True, 1)
+  screen_icon = gtk.Image()
+  screen_icon.set_from_file("resources/screenshot.png")
+  screen_icon.show()
+  screen_button = gtk.Button()
+  screen_button.add(screen_icon)
+  screen_button.connect("clicked", lambda w: do_screenshot(imlabel, urlabel))
+  box.pack_start(screen_button, True, False, 0)
+  screen_button.show()
+  return box
+
+def make_gist_box():
 
   box = gtk.HBox(True, 1)
   return box
 
-def make_gist_box:
 
-  box = gtk.HBox(True, 1)
-  return box
-
-
-
-
+def do_screenshot(imlabel, urlabel):
+  scrn_dir = os.path.expanduser("~") + "/catcloud_scrns"
+  if not os.path.exists(scrn_dir):
+    os.makedirs(scrn_dir)
+  im_name = scrn_dir + "/" + str(time.time()).replace(".", "") + ".png"
+  print im_name
+  ImageGrab.grab_to_file(im_name)
+  imlabel.set_text(im_name)
+  do_post(imlabel, urlabel)
 
 
 def show_window():
@@ -79,10 +96,12 @@ def show_window():
   button = gtk.Button()
   button.add(photo_icon)
   imlabel = gtk.Label("No image")
-  urllabel = gtk.Label("")
+  urlabel = gtk.Label("")
   button.connect("clicked", lambda w: getImage.add_image(imlabel))
   imbox.pack_start(button, True, False, 0)
   imbox.pack_end(imlabel, True, False, 0)
+  
+ 
 
 
 
@@ -92,16 +111,18 @@ def show_window():
   postbox = gtk.HBox(False, 0)
   post_button = gtk.Button()
   post_button.add(post_icon)
-  post_button.connect("clicked", lambda w: do_post(imlabel, urllabel))
+  post_button.connect("clicked", lambda w: do_post(imlabel, urlabel))
   postbox.pack_start(post_button, True, False, 0)
   box1.pack_start(imbox, False, False, 0)
-  box2 = make_box_urlabel(urllabel)
+
+  box2 = make_box_urlabel(urlabel)
   box1.pack_start(box2, False, False, 0)
   box2.show()
-
-
-
-
+  
+  scrbox = make_screenshot_box(imlabel, urlabel)
+  box1.pack_start(scrbox, False, False, 0)
+  scrbox.show()
+  
   box1.pack_end(postbox, False, False, 0)
   window.add(box1)
 
