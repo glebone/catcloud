@@ -6,6 +6,7 @@ import os
 from cloudapp.cloud import Cloud
 import pyperclip
 import pyscreenshot as ImageGrab
+from github3 import create_gist
 
 
 # custom modules
@@ -53,10 +54,58 @@ def make_screenshot_box(imlabel, urlabel):
   screen_button.show()
   return box
 
-def make_gist_box():
-
+def make_gist_box(imlabel, urlabel):
   box = gtk.HBox(True, 1)
+  sw = gtk.ScrolledWindow()
+  textview = gtk.TextView()
+  sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+  textbuffer = textview.get_buffer()
+  sw.add(textview)
+  
+  gist_name = gtk.Entry()
+  gist_name.set_max_length(50)
+  gist_name.set_text("hello")
+  gist_name.insert_text(" world", len(gist_name.get_text()))
+  gist_name.select_region(0, len(gist_name.get_text()))
+  
+  gist_icon = gtk.Image()
+  gist_icon.set_from_file("resources/gist.png")
+  gist_icon.show()
+  gist_button = gtk.Button()
+  gist_button.add(gist_icon)
+  gist_button.connect("clicked", lambda w: do_gist_post(imlabel, urlabel, textview, gist_name.get_text()))
+  box.pack_start(gist_button, True, False, 0)
+  box.pack_start(sw, True, True, 1)
+  box.pack_end(gist_name, True, True, 1)
+  gist_name.show()
+  gist_button.show()
+  textview.show()
+  sw.show()
   return box
+
+def do_gist_post(imlabel, urlabel, textview, gist_name):
+  scrn_dir = os.path.expanduser("~") + "/catcloud_scrns"
+  if not os.path.exists(scrn_dir):
+    os.makedirs(scrn_dir)
+  txt_name = scrn_dir + "/" + str(time.time()).replace(".", "") + ".txt"
+  txt2_name = str(time.time()).replace(".", "") + ".txt"
+  imlabel.set_text(txt_name)
+  tbuff = textview.get_buffer()
+  outfile = open(txt_name, "w")
+  outfile.write(tbuff.get_text(tbuff.get_start_iter(), tbuff.get_end_iter()))
+  outfile.close()
+  print "Posting gist..."
+  files = {
+    txt2_name : {
+        'content': tbuff.get_text(tbuff.get_start_iter(), tbuff.get_end_iter())
+        }
+    }
+  gist = create_gist(gist_name, files)
+  print(gist.html_url)
+  urlabel.set_text("Gist uploaded by url: " + gist.html_url)
+  pyperclip.copy(gist.html_url)
+
+  
 
 
 def do_screenshot(imlabel, urlabel):
@@ -122,6 +171,11 @@ def show_window():
   scrbox = make_screenshot_box(imlabel, urlabel)
   box1.pack_start(scrbox, False, False, 0)
   scrbox.show()
+
+  gistbox = make_gist_box(imlabel, urlabel)
+  box1.pack_start(gistbox, False, False, 0)
+  gistbox.show()
+
   
   box1.pack_end(postbox, False, False, 0)
   window.add(box1)
