@@ -25,7 +25,7 @@ image_path = ""
 
 def do_post(path, ulabel):
   mycloud = Cloud()
-  mycloud.auth('glebone@yandex.ru', 'toriytoriy1')
+  mycloud.auth('glebone@yandex.ru', '')
   img = mycloud.upload_file(path.get_text() )
   share_url = img["url"]
   print "Successfully upload photo - "
