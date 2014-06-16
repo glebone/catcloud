@@ -9,8 +9,9 @@ import pyscreenshot as ImageGrab
 from github3 import create_gist
 
 
-# custom modules
+# custom module
 import getImage
+import webcamShooter
 
 #  ^..^ CAT(c) 2014 CATCloud - CloudApp sharing app on PyGTK
 # --------------------------------------------------------
@@ -24,7 +25,7 @@ image_path = ""
 
 def do_post(path, ulabel):
   mycloud = Cloud()
-  mycloud.auth('glebone@yandex.ru', '')
+  mycloud.auth('glebone@yandex.ru', 'toriytoriy1')
   img = mycloud.upload_file(path.get_text() )
   share_url = img["url"]
   print "Successfully upload photo - "
@@ -107,6 +108,31 @@ def do_gist_post(imlabel, urlabel, textview, gist_name):
   urlabel.set_text("Gist uploaded by url: " + gist.html_url)
   pyperclip.copy(gist.html_url)
 
+
+
+def make_webcam_box(imlabel, urlabel):
+  box = gtk.HBox(True, 1)
+  webcam_icon = gtk.Image()
+  webcam_icon.set_from_file("resources/camera.png")
+  webcam_icon.show()
+  webcam_button = gtk.Button()
+  webcam_button.add(webcam_icon)
+  webcam_button.connect("clicked", lambda w: do_webcam_post(imlabel, urlabel))
+  box.pack_start(webcam_button, True, False, 0)
+  webcam_button.show()
+  return box
+
+
+
+def do_webcam_post(imlabel, urlabel):
+  
+  imlabel.set_text(webcamShooter.do_shoot())
+  do_post(imlabel, urlabel)
+
+
+
+
+
   
 
 
@@ -142,7 +168,7 @@ def show_window():
 
   imbox = gtk.HBox(False, 0)
   photo_icon = gtk.Image()
-  photo_icon.set_from_file("resources/camera.png")
+  photo_icon.set_from_file("resources/picture.png")
   photo_icon.show()
   button = gtk.Button()
   button.add(photo_icon)
@@ -173,6 +199,11 @@ def show_window():
   scrbox = make_screenshot_box(imlabel, urlabel)
   box1.pack_start(scrbox, False, False, 0)
   scrbox.show()
+
+  webcambox = make_webcam_box(imlabel, urlabel)
+  box1.pack_start(webcambox, False, False, 0)
+  webcambox.show()
+
 
   gistbox = make_gist_box(imlabel, urlabel)
   box1.pack_start(gistbox, False, False, 0)
